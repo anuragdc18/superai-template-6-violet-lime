@@ -18,7 +18,7 @@ import {
   Store,
   X,
 } from "lucide-react";
-import { CATEGORIES, POPULAR, SLIDES, serviceUrl, waLink, type Category } from "../lib/site";
+import { CATEGORIES, POPULAR, serviceUrl, waLink, type Category } from "../lib/site";
 import { asset } from "../lib/demo";
 import { serviceInfo } from "../lib/bot/knowledge";
 import { useSite } from "../queries/site";
@@ -48,13 +48,11 @@ function Heading({ title, text, center = false }: { title: string; text?: string
 }
 
 const MS = CATEGORIES.find((c) => c.slug === "microsoft-certifications")!;
-const OTHER_CATS = CATEGORIES.filter((c) => c.slug !== "microsoft-certifications");
 const countLabel = (c: Category) => `${c.services.length} ${c.slug === "microsoft-certifications" ? "Exams" : "Services"}`;
 
 /* ───────────────────────── 1. hero + form ───────────────────────── */
 
 function Hero() {
-  const slide = SLIDES.find((s) => s.link.includes("microsoft")) ?? SLIDES[0];
   return (
     <section className="relative overflow-hidden bg-white">
       {/* geometric colour blocks */}
@@ -66,31 +64,31 @@ function Hero() {
 
       <div className="container-x relative grid gap-10 pb-10 pt-10 sm:pt-14 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:gap-6 lg:pb-12 lg:pt-12">
         <div className="relative">
-          <p className="label-caps rise">{MS.title}</p>
+          <p className="label-caps rise">Business services · 100% online</p>
           <h1 className="rise mt-4 text-[44px] font-extrabold leading-[1.02] tracking-[-0.035em] sm:text-[60px] lg:text-[66px]" style={{ animationDelay: "60ms" }}>
-            Get Microsoft
+            Everything Your
             <br />
-            <span className="bg-gradient-to-r from-brand to-[#a98bff] bg-clip-text text-transparent">Certified</span>
+            <span className="bg-gradient-to-r from-brand to-[#a98bff] bg-clip-text text-transparent">Business Needs</span>
           </h1>
           <p className="rise mt-6 max-w-[460px] text-[17px] leading-relaxed" style={{ animationDelay: "120ms" }}>
-            {slide.text}
+            Registration, logo & branding, websites, social media, AI tools and Microsoft certifications — all in one place, handled by experts, 100% online.
           </p>
           <div className="rise mt-8 flex flex-wrap gap-3" style={{ animationDelay: "180ms" }}>
-            <Link to={`/services/${MS.slug}`} className="btn-brand">
-              Browse All Exams
-            </Link>
+            <a href="#enquiry" className="btn-brand">
+              Get Free Consultation
+            </a>
             <Link to="/contact" className="btn-outline">
               Talk to an expert
             </Link>
           </div>
           <div className="rise mt-8 flex flex-wrap items-center gap-x-1 gap-y-2 text-[13.5px]" style={{ animationDelay: "240ms" }}>
-            <span className="mr-2 font-semibold text-ink">Also:</span>
-            {OTHER_CATS.map((c, i) => (
+            <span className="mr-2 font-semibold text-ink">We help with:</span>
+            {CATEGORIES.map((c, i) => (
               <span key={c.slug} className="flex items-center">
                 <Link to={`/services/${c.slug}`} className="font-medium text-body underline-offset-4 hover:text-brand hover:underline">
                   {c.menu}
                 </Link>
-                {i < OTHER_CATS.length - 1 && <span className="mx-2 h-1 w-1 rounded-full bg-lav-2" />}
+                {i < CATEGORIES.length - 1 && <span className="mx-2 h-1 w-1 rounded-full bg-lav-2" />}
               </span>
             ))}
           </div>
@@ -108,8 +106,8 @@ function Hero() {
               <BadgeCheck className="h-5 w-5" />
             </span>
             <span className="leading-tight">
-              <span className="block text-[15px] font-extrabold text-ink">{MS.services.length} Fundamentals exams</span>
-              <span className="text-[12.5px]">Training · Practice tests · Booking</span>
+              <span className="block text-[15px] font-extrabold text-ink">{CATEGORIES.reduce((n, c) => n + c.services.length, 0)}+ services</span>
+              <span className="text-[12.5px]">7 areas · One expert team</span>
             </span>
           </div>
         </div>
