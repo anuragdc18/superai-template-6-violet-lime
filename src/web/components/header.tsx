@@ -5,6 +5,7 @@ import { Clock, Mail, Menu, Minus, Phone, Plus, X, ArrowRight, LayoutDashboard }
 import { CATEGORIES, serviceUrl, waLink } from "../lib/site";
 import { telHref, useSite } from "../queries/site";
 import { authClient } from "../lib/auth";
+import { useExtraLinks } from "./content-ui";
 
 export function Logo({ light = false }: { light?: boolean }) {
   const site = useSite();
@@ -41,6 +42,7 @@ function WaIcon({ className = "h-4 w-4" }: { className?: string }) {
 export { WaIcon };
 
 export function Header() {
+  const extra = useExtraLinks();
   const [open, setOpen] = useState(false);
   const [acc, setAcc] = useState<string | null>("registration");
   const [scrolled, setScrolled] = useState(false);
@@ -141,8 +143,26 @@ export function Header() {
                 </div>
               </div>
             ))}
+            {extra.length > 0 && (
+              <div className="group relative">
+                <button type="button" className={`relative flex items-center whitespace-nowrap rounded-md px-2.5 py-2 text-[14px] font-semibold transition xl:px-3 ${extra.some((x) => loc.startsWith(x.to)) ? "text-brand" : "text-ink group-hover:text-brand"}`}>
+                  More
+                  <span className="absolute inset-x-2.5 -bottom-[17px] h-[3px] origin-left scale-x-0 bg-lime transition group-hover:scale-x-100 xl:inset-x-3" />
+                </button>
+                <div className="invisible absolute right-0 top-full w-[220px] translate-y-2 pt-3 opacity-0 transition duration-200 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+                  <div className="rounded-md border border-line bg-white p-2 shadow-[0_24px_50px_-20px_rgba(15,23,42,0.3)]">
+                    {[...extra, { to: "/contact", label: "Contact Us" }].map((x) => (
+                      <Link key={x.to} to={x.to} className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[14px] text-navy hover:bg-surface hover:text-royal">
+                        <span className="h-1.5 w-1.5 rounded-full bg-lime ring-2 ring-lime/30" />
+                        {x.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </nav>
-          <Link to="/contact" className="btn-brand !hidden !px-5 !py-2.5 !text-[14px] min-[1150px]:!ml-4 min-[1150px]:!inline-flex">
+          <Link to="/contact" className="btn-brand !hidden whitespace-nowrap !px-5 !py-2.5 !text-[14px] min-[1150px]:!ml-4 min-[1150px]:!inline-flex">
             Get Started
           </Link>
 
@@ -216,6 +236,11 @@ export function Header() {
                 </div>
               );
             })}
+            {[...extra, { to: "/contact", label: "Contact Us" }].map((x) => (
+              <Link key={x.to} to={x.to} className="block border-b border-line py-3.5 font-semibold text-navy">
+                {x.label}
+              </Link>
+            ))}
             {session && (
               <Link to="/admin/dashboard" className="block py-3.5 font-semibold text-royal">
                 Owner Dashboard

@@ -24,6 +24,8 @@ import { serviceInfo } from "../lib/bot/knowledge";
 import { useSite } from "../queries/site";
 import { LeadForm } from "../components/lead-form";
 import { WaIcon } from "../components/header";
+import { useContent } from "../queries/content";
+import { PostCard } from "../components/content-ui";
 
 /* ───────────────────────── shared bits ───────────────────────── */
 
@@ -124,7 +126,7 @@ function Hero() {
 
 /* ───────────────────────── 2. stats band ───────────────────────── */
 
-const STATS = [
+const BASE_STATS = [
   { big: "4.8", small: "Google Rating" },
   { big: "1,000+", small: "Happy Clients" },
   { big: "Pan-India", small: "Service Coverage" },
@@ -132,6 +134,8 @@ const STATS = [
 ];
 
 function Stats() {
+  const rating = useContent().reviewsSection.rating;
+  const STATS = BASE_STATS.map((s) => (s.small === "Google Rating" ? { ...s, big: rating } : s)).filter((s) => s.big);
   return (
     <section className="bg-lav">
       <div className="container-x grid grid-cols-2 py-8 md:grid-cols-4 md:py-10">
@@ -475,22 +479,21 @@ function Comparison() {
 
 /* ───────────────────────── 8. testimonial spotlight ───────────────────────── */
 
-const REVIEWS = [
-  { name: "Ravi K.", city: "Hyderabad", text: "My GST and company registration were done in a week. Very smooth, and they explained everything simply." },
-  { name: "Priya S.", city: "Bengaluru", text: "They designed our logo and website together. Looks very professional and customers notice it." },
-  { name: "Arjun M.", city: "Pune", text: "Our Instagram enquiries doubled in 2 months. The team posts on time every week." },
-];
 
 function Testimonials() {
+  const content = useContent();
+  const rs = content.reviewsSection;
+  const REVIEWS = rs.show ? content.reviews : [];
   const [i, setI] = useState(0);
   const [paused, setPaused] = useState(false);
   const n = REVIEWS.length;
   useEffect(() => {
-    if (paused) return;
+    if (paused || n < 2) return;
     const t = setTimeout(() => setI((v) => (v + 1) % n), 6500);
     return () => clearTimeout(t);
   }, [i, paused, n]);
-  const r = REVIEWS[i];
+  const r = REVIEWS[i % Math.max(n, 1)];
+  if (!r) return null;
   return (
     <section className="bg-white py-16 sm:py-24" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
       <div className="container-x grid gap-10 lg:grid-cols-[0.75fr_1.25fr] lg:items-center">
@@ -498,17 +501,19 @@ function Testimonials() {
           <h2 className="flex items-center gap-3 text-[28px] font-extrabold leading-tight sm:text-[36px]">
             <PlusMark className="text-[30px] sm:text-[34px]" /> What Our Clients Say
           </h2>
-          <div className="mt-5 flex items-center gap-3">
-            <span className="text-[44px] font-extrabold leading-none text-ink">4.8</span>
+          {rs.rating && (
+          <a href={rs.googleUrl || undefined} target="_blank" rel="noreferrer" className="mt-5 flex items-center gap-3">
+            <span className="text-[44px] font-extrabold leading-none text-ink">{rs.rating}</span>
             <span>
               <span className="flex text-[#f5b400]">
                 {[0, 1, 2, 3, 4].map((k) => (
                   <Star key={k} className="h-5 w-5 fill-current" />
                 ))}
               </span>
-              <span className="text-[13px] font-medium">on Google</span>
+              <span className="text-[13px] font-medium">on Google{rs.ratingCount ? ` (${rs.ratingCount})` : ""}</span>
             </span>
-          </div>
+          </a>
+          )}
           <div className="mt-8 flex gap-2">
             <button
               onClick={() => setI((i - 1 + n) % n)}
@@ -541,13 +546,13 @@ function Testimonials() {
               <span className="grid h-12 w-12 place-items-center rounded-full bg-brand text-[17px] font-extrabold text-white">{r.name[0]}</span>
               <span>
                 <span className="block font-bold text-ink">{r.name}</span>
-                <span className="text-[13.5px]">{r.city}</span>
+                <span className="text-[13.5px]">{r.place}</span>
               </span>
             </span>
             <span className="flex gap-1.5">
               {REVIEWS.map((x, k) => (
                 <button
-                  key={x.name}
+                  key={x.id}
                   onClick={() => setI(k)}
                   aria-label={`Show review ${k + 1}`}
                   className={`h-2 rounded-full transition-all ${k === i ? "w-7 bg-brand" : "w-2 bg-lav-2"}`}
@@ -564,16 +569,11 @@ function Testimonials() {
 
 /* ───────────────────────── 9. FAQ ───────────────────────── */
 
-const FAQS = [
-  { q: "Do I need to visit your office?", a: "No. Everything is done online. You can share documents on WhatsApp or email." },
-  { q: "How long does GST registration take?", a: "Usually 3 to 7 working days, once we have all your documents." },
-  { q: "Can you do registration and the website together?", a: "Yes. Many clients start with registration and logo, then add a website. We offer combo prices." },
-  { q: "How do I pay?", a: "You can pay by UPI, debit/credit card or bank transfer. You get a proper GST invoice." },
-  { q: "I'm not sure which registration I need. Can you help?", a: "Yes — that's what the free consultation is for. Our expert will suggest the right option for you." },
-];
 
 function Faq() {
   const [open, setOpen] = useState<number | null>(0);
+  const FAQS = useContent().faqs;
+  if (!FAQS.length) return null;
   return (
     <section className="bg-white pb-16 sm:pb-24">
       <div className="container-x max-w-3xl">
@@ -585,7 +585,7 @@ function Faq() {
           {FAQS.map((f, idx) => {
             const isOpen = open === idx;
             return (
-              <div key={f.q} className="border-b border-line">
+              <div key={f.id} className="border-b border-line">
                 <button
                   onClick={() => setOpen(isOpen ? null : idx)}
                   className="flex w-full items-center justify-between gap-4 py-5 text-left text-[16px] font-bold text-ink hover:text-brand"
@@ -604,6 +604,32 @@ function Faq() {
               </div>
             );
           })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ───────────────────────── latest blog posts ───────────────────────── */
+
+function LatestPosts() {
+  const content = useContent();
+  if (!content.blog.show || !content.posts.length) return null;
+  return (
+    <section className="bg-white pb-16 sm:pb-24">
+      <div className="container-x">
+        <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
+          <h2 className="flex items-center gap-3 text-[28px] font-extrabold leading-tight sm:text-[36px]">
+            <PlusMark className="text-[30px] sm:text-[34px]" /> Tips & Guides
+          </h2>
+          <Link to="/blog" className="inline-flex items-center gap-1.5 text-[14px] font-bold text-brand hover:gap-2.5">
+            See all articles <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {content.posts.slice(0, 3).map((p) => (
+            <PostCard key={p.id} p={p} />
+          ))}
         </div>
       </div>
     </section>
@@ -645,6 +671,7 @@ export default function Index() {
       <Process />
       <Comparison />
       <Testimonials />
+      <LatestPosts />
       <Faq />
       <CtaBand />
     </>
