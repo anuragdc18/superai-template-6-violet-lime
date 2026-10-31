@@ -103,7 +103,7 @@ export function LeadForm({
               <option value="">{row ? "Choose a service" : "Select Service"}</option>
               {CATEGORIES.map((c) => (
                 <optgroup key={c.slug} label={c.title}>
-                  {c.services.map((s) => (
+                  {c.services.filter((s) => c.menuItems.includes(s.name) || s.name === service).map((s) => (
                     <option key={s.name} value={s.name} className="text-ink">
                       {s.name}
                     </option>
