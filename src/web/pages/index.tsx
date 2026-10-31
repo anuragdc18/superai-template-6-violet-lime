@@ -324,7 +324,7 @@ function CertTable() {
 /* ───────────────────────── 5. popular services ───────────────────────── */
 
 const POP_ICONS = [FileText, Landmark, BadgeCheck, Store, PenTool, Globe2, Instagram, MessageCircle];
-const MOST_CHOSEN = new Set(["GST Registration", "Business Website"]);
+const MOST_CHOSEN = new Set(["GST Registration", "WordPress Website Development"]);
 
 function Popular() {
   return (
